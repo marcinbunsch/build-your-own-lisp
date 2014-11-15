@@ -4,6 +4,9 @@
 
 #include "lval.h"
 
+#define LASSERT(args, cond, err) \
+  if (!(cond)) { lval_del(args); return lval_err(err); }
+
 static const int LVAL_SIZE = sizeof(lval);
 static const int LVALP_SIZE = sizeof(lval*);
 
@@ -194,6 +197,7 @@ lval* lval_take(lval* v, int i) {
 
 lval* builtin(lval* a, char* func) {
   if (strcmp("head", func) == 0) return builtin_head(a);
+  if (strcmp("tail", func) == 0) return builtin_tail(a);
   if (strstr("-+/*", func)) return builtin_op(a, func);
   lval_del(a);
   return lval_err("Unknown function");
@@ -239,29 +243,37 @@ lval* builtin_op(lval* a, char* op) {
   return x;
 }
 
-
 lval* builtin_head(lval* a) {
-  // check error conditions
-  if (a->count != 1) {
-    lval_del(a);
-    return lval_err("Function 'head' passed too many arguments");
-  }
-
-  if (a->cell[0]->type != LVAL_QEXPR) {
-    lval_del(a);
-    return lval_err("Function 'head' passed incorrect types");
-  }
-
-  if (a->cell[0]->count == 0) {
-    lval_del(a);
-    return lval_err("Function 'head' passed {}");
-  }
+  LASSERT(a, a->count == 1,
+    "Function 'head' passed too many arguments");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+    "Function 'head' passed incorrect types");
+  LASSERT(a, a->cell[0]->count != 0,
+    "Function 'head' passed {}");
 
   // if ok, take first argument, which is the qexpr
   lval* v = lval_take(a, 0);
 
   // delete all elements that are not head from the qexpr
   while (v->count > 1) { lval_del(lval_pop(v, 1)); }
+
+  return v;
+}
+
+lval* builtin_tail(lval* a) {
+  // check error conditions
+  LASSERT(a, a->count == 1,
+    "Function 'tail' passed too many arguments");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+    "Function 'tail' passed incorrect types");
+  LASSERT(a, a->cell[0]->count != 0,
+    "Function 'tail' passed {}");
+
+  // if ok, take first argument, which is the qexpr
+  lval* v = lval_take(a, 0);
+
+  // delete first element
+  lval_del(lval_pop(v, 0));
 
   return v;
 }
