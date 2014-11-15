@@ -198,6 +198,8 @@ lval* lval_take(lval* v, int i) {
 lval* builtin(lval* a, char* func) {
   if (strcmp("head", func) == 0) return builtin_head(a);
   if (strcmp("tail", func) == 0) return builtin_tail(a);
+  if (strcmp("list", func) == 0) return builtin_list(a);
+  if (strcmp("eval", func) == 0) return builtin_eval(a);
   if (strstr("-+/*", func)) return builtin_op(a, func);
   lval_del(a);
   return lval_err("Unknown function");
@@ -277,3 +279,22 @@ lval* builtin_tail(lval* a) {
 
   return v;
 }
+
+lval* builtin_list(lval* a) {
+  a->type = LVAL_QEXPR;
+  return a;
+}
+
+lval* builtin_eval(lval* a) {
+  LASSERT(a, a->count == 1,
+    "Function 'eval' passed too many arguments");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+    "Function 'eval' passed incorrect type");
+
+  lval* x = lval_take(a, 0);
+  x->type = LVAL_SEXPR;
+
+  return lval_eval(x);
+}
+
+

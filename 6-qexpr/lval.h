@@ -49,3 +49,5 @@ lval* builtin(lval* a, char* op);
 lval* builtin_op(lval* a, char* op);
 lval* builtin_head(lval* a);
 lval* builtin_tail(lval* a);
+lval* builtin_list(lval* a);
+lval* builtin_eval(lval* a);
