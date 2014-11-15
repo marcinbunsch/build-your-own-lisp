@@ -2,4 +2,5 @@
 /2-mpc/parsing
 /3-eval/lispy
 /4-errors/lispy
+/5-sexpr/lispy
 *.dSYM
