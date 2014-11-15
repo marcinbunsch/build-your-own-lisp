@@ -5,7 +5,6 @@
 
 #include "../shared/mpc.h"
 #include "lval.h"
-#include "eval.h"
 
 int main(int argc, char **argv) {
 
@@ -47,7 +46,7 @@ int main(int argc, char **argv) {
 
     if (mpc_parse("<stdin>", input, Lispy, &ast)) {
       // result = eval(ast.output);
-      lval* result = lval_read(ast.output);
+      lval* result = lval_eval(lval_read(ast.output));
       lval_println(result);
       lval_del(result);
       mpc_ast_delete(ast.output);
