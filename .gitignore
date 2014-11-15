@@ -3,4 +3,5 @@
 /3-eval/lispy
 /4-errors/lispy
 /5-sexpr/lispy
+/6-qexpr/lispy
 *.dSYM
