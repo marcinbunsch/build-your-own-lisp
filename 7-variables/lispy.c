@@ -5,6 +5,7 @@
 
 #include "../shared/mpc.h"
 #include "lval.h"
+#include "lenv.h"
 
 int main(int argc, char **argv) {
 
@@ -25,13 +26,15 @@ int main(int argc, char **argv) {
 
   mpca_lang(MPCA_LANG_DEFAULT,
     "number : /-?[0-9]+/ ; \
-     symbol : \"head\" | \"tail\" | \"list\" | \"eval\" | \
-              \"join\" | '+' | '-' | '*' | '/' ; \
+     symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ; \
      sexpr : '(' <expr>* ')' ; \
      qexpr : '{' <expr>* '}' ; \
      expr : <number> | <symbol> | <sexpr> | <qexpr> ; \
      lispy : /^/ <expr>* /$/ ; \
     ", Number, Symbol, Sexpr, Qexpr, Expr, Lispy);
+
+  lenv* env = lenv_new();
+  lenv_add_builtins(env);
 
   // In a never ending loop
   while(1) {
@@ -49,7 +52,7 @@ int main(int argc, char **argv) {
 
     if (mpc_parse("<stdin>", input, Lispy, &ast)) {
       // result = eval(ast.output);
-      lval* result = lval_eval(lval_read(ast.output));
+      lval* result = lval_eval(env, lval_read(ast.output));
       lval_println(result);
       lval_del(result);
       mpc_ast_delete(ast.output);
@@ -63,6 +66,7 @@ int main(int argc, char **argv) {
 
   }
 
+  lenv_del(env);
   mpc_cleanup(5, Number, Symbol, Sexpr, Qexpr, Expr, Lispy);
   return 0;
 }
