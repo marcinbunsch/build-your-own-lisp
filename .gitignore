@@ -4,4 +4,5 @@
 /4-errors/lispy
 /5-sexpr/lispy
 /6-qexpr/lispy
+/7-variables/lispy
 *.dSYM
